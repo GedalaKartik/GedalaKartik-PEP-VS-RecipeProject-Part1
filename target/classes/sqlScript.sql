@@ -8,8 +8,13 @@
 --      4. password: A non-nullable varchar field to store the chef's password.
 --      5. isAdmin: A boolean field to indicate if the chef has admin privileges.
 
-CREATE TABLE CHEF (
-	
+CREATE TABLE CHEF 
+(
+	id integer primary key auto_increment,
+	username varchar(100) unique not null,
+	email varchar(100) unique not null,
+	password varchar(100) not null,
+	isAdmin boolean	
 );
 
 
@@ -21,8 +26,13 @@ CREATE TABLE CHEF (
 --      2. name: A unique and non-nullable varchar field to store the recipe's name.
 --      3. instructions: A non-nullable varchar field to store the recipe's instructions.
 --      4. chef_id: A foreign key that references the 'id' field from the Chef table. Ensure that referential integrity is maintained by cascading deletions.
-CREATE TABLE RECIPE (
-	
+CREATE TABLE RECIPE 
+(
+	id integer primary key auto_increment,
+	name varchar(100) unique not null,
+	instructions varchar(100) not null,
+	chef_id integer,
+	foreign key (chef_id) references CHEF(id)
 );
 
 -- Create Ingredient Table:
@@ -30,8 +40,10 @@ CREATE TABLE RECIPE (
 -- Fields:
 --      1. id: An auto-incremented primary key to uniquely identify each ingredient.
 --      2. name: A unique and non-nullable varchar field (max 20 characters) to store the ingredient's name.
-CREATE TABLE INGREDIENT (
-	
+CREATE TABLE INGREDIENT 
+(
+	id integer primary key auto_increment,
+	name varchar(20) unique not null	
 );
 
 -- Recipe_Ingredient Table
@@ -44,8 +56,16 @@ CREATE TABLE INGREDIENT (
 -- 4. vol: A decimal field to store the volume of the ingredient used in the recipe.
 -- 5. unit: A non-nullable varchar field (max 20 characters) to store the unit of the volume.
 -- 6. is_metric: A boolean field to indicate if the unit is in metric. Defaults to false.
-CREATE TABLE RECIPE_INGREDIENT (
-
+CREATE TABLE RECIPE_INGREDIENT 
+(
+	id integer primary key auto_increment,
+	recipe_id integer not null,
+	ingredient_id integer  not null,
+	vol decimal(10,2),
+	unit varchar(20) not null,
+	is_metric boolean default false,
+	foreign key (recipe_id) references RECIPE(id),
+	foreign key (ingredient_id) references INGREDIENT(id)
 );
 
 -- DO NOT EDIT ANY CODE BELOW THIS LINE!

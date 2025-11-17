@@ -1,5 +1,7 @@
 package com.revature.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -26,6 +28,7 @@ public class RecipeDAO {
 	 * DAO for managing Chef entities, used for retrieving chef details associated with recipes.
 	 */
 	private ChefDAO chefDAO;
+	
 
 	/**
 	 * DAO for managing Ingredient entities, used for retrieving ingredient details for recipes.
@@ -46,8 +49,12 @@ public class RecipeDAO {
 	 * @param ingredientDAO - the IngredientDAO used for retrieving ingredient details.
      * @param connectionUtil - the utility used to connect to the database
 	 */
-	public RecipeDAO(ChefDAO chefDAO, IngredientDAO ingredientDAO, ConnectionUtil connectionUtil) {
+	public RecipeDAO(ChefDAO chefDAO, IngredientDAO ingredientDAO, ConnectionUtil connectionUtil) 
+	{
+		this.connectionUtil=new ConnectionUtil();
 		
+		this.chefDAO=new ChefDAO(connectionUtil);
+		this.ingredientDAO=new IngredientDAO(connectionUtil);
 	}
 
     /**
@@ -56,8 +63,32 @@ public class RecipeDAO {
      * @return a list of all Recipe objects
      */
 
-    public List<Recipe> getAllRecipes() {
-        return(null);
+    public List<Recipe> getAllRecipes() 
+	{
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="SELECT * FROM RECIPE ORDER BY id";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+            ResultSet rs=ps.executeQuery();
+
+            List<Recipe> rep=new ArrayList<>();
+
+            while(rs.next())
+            {
+                int chefid=rs.getInt("chef_id");
+				Chef chef=chefDAO.getChefById(chefid);
+				Recipe obj=new Recipe(rs.getInt("id"),rs.getString("name"),rs.getString("instructions"),chef);
+                rep.add(obj);
+            }
+            return rep;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+         return null;
     }
 
     /**

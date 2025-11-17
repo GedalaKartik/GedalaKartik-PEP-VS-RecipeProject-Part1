@@ -5,8 +5,12 @@ import com.revature.util.PageOptions;
 import com.revature.model.Chef;
 import java.util.List;
 import java.util.ArrayList;
+//import java.beans.Statement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 
 /**
@@ -22,6 +26,7 @@ public class ChefDAO {
     /** A utility class for establishing connections to the database. */
     @SuppressWarnings("unused")
     private ConnectionUtil connectionUtil;
+   
 
     /** 
      * Constructs a ChefDAO with the specified ConnectionUtil for database connectivity.
@@ -30,8 +35,12 @@ public class ChefDAO {
      * 
      * @param connectionUtil the utility used to connect to the database
      */
-    public ChefDAO(ConnectionUtil connectionUtil) {
+    public ChefDAO(ConnectionUtil connectionUtil)
+    {
+     
+        this.connectionUtil=new ConnectionUtil();
         
+          
     }
 
     /**
@@ -39,8 +48,30 @@ public class ChefDAO {
      * 
      * @return a list of all Chef objects
      */
-    public List<Chef> getAllChefs() {
-        return null;
+    public List<Chef> getAllChefs() 
+    {
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="SELECT * FROM CHEF ORDER BY id";
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            List<Chef> chf=new ArrayList<>();
+
+            while(rs.next())
+            {
+                Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+                chf.add(obj);
+            }
+            return chf;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+         return null;
+        
     }
 
     /**
@@ -49,7 +80,9 @@ public class ChefDAO {
      * @param pageOptions options for pagination, including page size and page number
      * @return a paginated list of Chef objects
      */
-    public Page<Chef> getAllChefs(PageOptions pageOptions) {
+    public Page<Chef> getAllChefs(PageOptions pageOptions) 
+    {
+        
         return null;
     }
 
@@ -59,7 +92,30 @@ public class ChefDAO {
      * @param id the unique identifier of the Chef to retrieve.
      * @return the Chef object, if found.
      */
-    public Chef getChefById(int id) {
+    public Chef getChefById(int id) 
+    {
+        
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="select * from CHEF where id=?";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+            ps.setInt(1, id);
+
+            ResultSet rs=ps.executeQuery();
+
+
+            if(rs.next())
+            {
+                return new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+            }
+            return null;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -69,8 +125,32 @@ public class ChefDAO {
      * @param chef the Chef object to be created.
      * @return the unique identifier of the created Chef.
      */
-    public int createChef(Chef chef) {
-        return 0;
+    public int createChef(Chef chef) 
+    {
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="insert into CHEF(username, email, password, isAdmin) values(?,?,?,?)";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+
+            ps.setString(1, chef.getUsername());
+            ps.setString(2, chef.getEmail());
+            ps.setString(3, chef.getPassword());
+            ps.setBoolean(4, chef.isAdmin());
+
+            int x=ps.executeUpdate();
+
+
+            if(x>0)
+                return x;
+            return 0;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     /**
@@ -78,8 +158,31 @@ public class ChefDAO {
      *
      * @param chef the Chef object containing updated information.
      */
-    public void updateChef(Chef chef) {
-        
+    public void updateChef(Chef chef) 
+    {
+         try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="update CHEF set username=?, email=?, password=?, isAdmin=? where id=?";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+
+            ps.setString(1, chef.getUsername());
+            ps.setString(2, chef.getEmail());
+            ps.setString(3, chef.getPassword());
+            ps.setBoolean(4, chef.isAdmin());
+            ps.setInt(5, chef.getId());
+
+            int x=ps.executeUpdate();
+
+
+               
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+           
+        }
     }
 
     /**
@@ -87,8 +190,27 @@ public class ChefDAO {
      *
      * @param chef the Chef object to be deleted.
      */
-    public void deleteChef(Chef chef) {
-        
+    public void deleteChef(Chef chef) 
+    {
+         try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="delete from CHEF where id=?";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+
+            ps.setInt(1, chef.getId());
+
+            int x=ps.executeUpdate();
+
+
+              
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+          
+        }    
     }
 
     /**
@@ -179,4 +301,5 @@ public class ChefDAO {
         return sliced;
     }
 }
+
 

@@ -1,5 +1,7 @@
 package com.revature.dao;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,7 +10,9 @@ import java.util.List;
 import com.revature.util.ConnectionUtil;
 import com.revature.util.Page;
 import com.revature.util.PageOptions;
+import com.revature.model.Chef;
 import com.revature.model.Ingredient;
+import java.sql.Statement;
 
 
 
@@ -24,6 +28,7 @@ public class IngredientDAO {
     /** A utility class used for establishing connections to the database. */
     @SuppressWarnings("unused")
     private ConnectionUtil connectionUtil;
+ 
 
     /**
      * Constructs an IngredientDAO with the specified ConnectionUtil for database connectivity.
@@ -32,8 +37,10 @@ public class IngredientDAO {
      * 
      * @param connectionUtil the utility used to connect to the database
      */
-    public IngredientDAO(ConnectionUtil connectionUtil) {
-        
+    public IngredientDAO(ConnectionUtil connectionUtil) 
+    {
+        this.connectionUtil=new ConnectionUtil();
+           
     }
 
     /**
@@ -42,9 +49,34 @@ public class IngredientDAO {
      * @param id the unique identifier of the Ingredient to retrieve.
      * @return the Ingredient object with the specified id.
      */
-    public Ingredient getIngredientById(int id) {
-        return null;
+    public Ingredient getIngredientById(int id) 
+    {
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="select id,name from INGREDIENT where id=?";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+            ps.setInt(1, id);
+
+            ResultSet rs=ps.executeQuery();
+
+
+            if(rs.next())
+            {
+                return new Ingredient(rs.getInt("id"),rs.getString("name"));
+            }
+            return null;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+            return null;
+        }
+
     }
+
+ 
 
     /**
      * TODO: Creates a new Ingredient record in the database.
@@ -52,8 +84,45 @@ public class IngredientDAO {
      * @param ingredient the Ingredient object to be created.
      * @return the unique identifier of the created Ingredient.
      */
-    public int createIngredient(Ingredient ingredient) {
-        return 0;
+    public int createIngredient(Ingredient ingredient) 
+    {
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="insert into INGREDIENT(name) values(?)";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+
+            ps.setString(1, ingredient.getName());
+
+            int x=ps.executeUpdate();
+
+
+            if(x>0)
+            {
+            
+                String sql1 = "SELECT id FROM INGREDIENT WHERE name = ?";
+                PreparedStatement ps1 = con.prepareStatement(sql1);
+
+                ps1.setString(1, ingredient.getName());
+
+                ResultSet rs = ps1.executeQuery();
+
+                if(rs.next())   // move to first row
+                {
+                    return rs.getInt("id");   // return id
+                }
+
+               
+            }
+
+            return 0;    
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     /**
@@ -61,8 +130,30 @@ public class IngredientDAO {
      *
      * @param ingredient the Ingredient object to be deleted.
      */
-    public void deleteIngredient(Ingredient ingredient) {
-        
+    public void deleteIngredient(Ingredient ingredient) 
+    {
+        try(Connection con=connectionUtil.getConnection())
+        {
+            String sql1="delete from INGREDIENT where id=?";
+            String sql2="delete from RECIPE_INGREDIENT where ingredient_id=?";
+            
+            PreparedStatement ps1=con.prepareStatement(sql1);
+            PreparedStatement ps2=con.prepareStatement(sql2);
+
+            ps1.setInt(1,ingredient.getId());
+            ps2.setInt(1, ingredient.getId());
+
+
+
+            ps1.executeUpdate();
+            ps2.executeUpdate();
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+          
+        }
     }
 
     /**
@@ -70,8 +161,28 @@ public class IngredientDAO {
      *
      * @param ingredient the Ingredient object containing updated information.
      */
-    public void updateIngredient(Ingredient ingredient) {
-        
+    public void updateIngredient(Ingredient ingredient) 
+    {
+         try(Connection con=connectionUtil.getConnection())
+        {
+            String sql="update INGREDIENT set name=? where id=?";
+            PreparedStatement ps=con.prepareStatement(sql);
+
+
+            ps.setString(1, ingredient.getName());
+            ps.setInt(2, ingredient.getId());
+
+            int x=ps.executeUpdate();
+
+
+               
+        } 
+        catch (SQLException e) 
+        {
+            // TODO: handle exception
+            e.printStackTrace();
+           
+        }    
     }
 
     /**
@@ -159,3 +270,4 @@ public class IngredientDAO {
                 (int) Math.ceil(ingredients.size() / ((float) pageOptions.getPageSize())), ingredients.size(), subList);
     }
 }
+
