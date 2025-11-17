@@ -141,8 +141,12 @@ public class ChefDAO {
             int x=ps.executeUpdate();
 
 
-            if(x>0)
-                return x;
+           if (x > 0) {
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);   // return generated chef_id
+            }
+        }
             return 0;    
         } 
         catch (SQLException e) 
@@ -219,7 +223,35 @@ public class ChefDAO {
      * @param term the search term to filter Chef usernames.
      * @return a list of Chef objects that match the search term.
      */
-    public List<Chef> searchChefsByTerm(String term) {
+    public List<Chef> searchChefsByTerm(String term) 
+    {
+        try(Connection con=connectionUtil.getConnection()) 
+        {
+            String sql="SELECT * FROM CHEF ";
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            List<Chef> chf=new ArrayList<>();
+
+            while(rs.next())
+            {
+                String uname=rs.getString("username");
+
+                if(term.equals(uname))
+                {
+                     Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+                     chf.add(obj);
+                }
+                
+                
+            }
+            return chf; 
+
+            
+        } 
+        catch (Exception e) {
+            // TODO: handle exception
+        }
         return null;
     }
 

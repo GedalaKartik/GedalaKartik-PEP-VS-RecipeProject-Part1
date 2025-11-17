@@ -27,8 +27,9 @@ public class ChefService {
      * 
      * @param chefDao the ChefDao to be used by this service for data access
      */
-    public ChefService(ChefDAO chefDAO) {
-        
+    public ChefService(ChefDAO chefDAO) 
+    {
+        this.chefDAO=chefDAO;    
     }
 
     /**
@@ -38,8 +39,10 @@ public class ChefService {
      * @return an Optional containing the found Chef if present; 
      *         an empty Optional if not found
      */
-    public Optional<Chef> findChef(int id) {
-        return null; 
+    public Optional<Chef> findChef(int id)
+    {
+        Chef chef = chefDAO.getChefById(id);
+        return Optional.ofNullable(chef);
     }
 
     /**
@@ -49,7 +52,19 @@ public class ChefService {
      *
      * @param chef the Chef entity to be saved or updated
      */
-    public void saveChef(Chef chef) {
+    public void saveChef(Chef chef) 
+    {
+        int id=chef.getId();
+        
+        if(id==0)
+        {
+            int chefid=chefDAO.createChef(chef);
+            chef.setId(chefid);
+        }
+        else
+        {
+            chefDAO.updateChef(chef);
+        }
         
     }
 
@@ -61,8 +76,16 @@ public class ChefService {
      * @param term the search term for filtering Chefs by attributes
      * @return a list of Chefs matching the search criteria, or all Chefs if term is null
      */
-    public List<Chef> searchChefs(String term) {
-        return null;
+    public List<Chef> searchChefs(String term) 
+    {
+        if(term==null)
+        {
+            return chefDAO.getAllChefs();
+        }
+        else
+        {
+            return chefDAO.searchChefsByTerm(term);
+        }
     }
 
     /**
@@ -70,8 +93,14 @@ public class ChefService {
      *
      * @param id the unique identifier of the Chef to be deleted
      */
-    public void deleteChef(int id) {
-        
+    public void deleteChef(int id) 
+    {
+        Chef chf=chefDAO.getChefById(id);
+
+        if(chf!=null)
+        {
+            chefDAO.deleteChef(chf);
+        }
     }
 
     /**
