@@ -60,7 +60,7 @@ public class ChefDAO {
 
             while(rs.next())
             {
-                Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+                Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("is_admin"));
                 chf.add(obj);
             }
             return chf;    
@@ -107,7 +107,7 @@ public class ChefDAO {
 
             if(rs.next())
             {
-                return new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+                return new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("is_admin"));
             }
             return null;    
         } 
@@ -129,7 +129,7 @@ public class ChefDAO {
     {
         try(Connection con=connectionUtil.getConnection())
         {
-            String sql="insert into CHEF(username, email, password, isAdmin) values(?,?,?,?)";
+            String sql="insert into CHEF(username, email, password, is_admin) values(?,?,?,?)";
             PreparedStatement ps=con.prepareStatement(sql);
 
 
@@ -141,12 +141,14 @@ public class ChefDAO {
             int x=ps.executeUpdate();
 
 
-           if (x > 0) {
-            ResultSet rs = ps.getGeneratedKeys();
-            if (rs.next()) {
-                return rs.getInt(1);   // return generated chef_id
+            if (x > 0)
+            {
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) 
+                {
+                    return rs.getInt(1);   // return generated chef_id
+                }
             }
-        }
             return 0;    
         } 
         catch (SQLException e) 
@@ -166,7 +168,7 @@ public class ChefDAO {
     {
          try(Connection con=connectionUtil.getConnection())
         {
-            String sql="update CHEF set username=?, email=?, password=?, isAdmin=? where id=?";
+            String sql="update CHEF set username=?, email=?, password=?, is_admin=? where id=?";
             PreparedStatement ps=con.prepareStatement(sql);
 
 
@@ -239,7 +241,7 @@ public class ChefDAO {
 
                 if(term.equals(uname))
                 {
-                     Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("isAdmin"));
+                     Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("is_admin"));
                      chf.add(obj);
                 }
                 

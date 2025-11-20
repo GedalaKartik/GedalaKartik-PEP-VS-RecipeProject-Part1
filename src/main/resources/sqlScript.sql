@@ -14,7 +14,7 @@ CREATE TABLE CHEF
 	username varchar(100) unique not null,
 	email varchar(100) unique not null,
 	password varchar(100) not null,
-	isAdmin boolean	
+	is_admin boolean	
 );
 
 
@@ -125,3 +125,85 @@ VALUES
     (default, 4, 4, 1, 'Tbs'),
     (default, 4, 5, 2, 'cups');
 
+
+
+-- -- 
+-- -- Create the Chef Table:
+-- CREATE TABLE CHEF (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     username VARCHAR(100) UNIQUE NOT NULL,
+--     email VARCHAR(100) UNIQUE NOT NULL,
+--     password VARCHAR(100) NOT NULL,
+--     is_admin BOOLEAN
+-- );
+
+-- -- Create the Recipe Table:
+-- CREATE TABLE RECIPE (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     name VARCHAR(100) UNIQUE NOT NULL,
+--     instructions VARCHAR(100) NOT NULL,
+--     chef_id INT,
+--     FOREIGN KEY (chef_id) REFERENCES CHEF(id) ON DELETE SET NULL
+-- );
+
+-- -- Create Ingredient Table:
+-- CREATE TABLE INGREDIENT (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     name VARCHAR(20) UNIQUE NOT NULL
+-- );
+
+-- -- Recipe_Ingredient Table (join table)
+-- CREATE TABLE RECIPE_INGREDIENT (
+--     id INT PRIMARY KEY AUTO_INCREMENT,
+--     recipe_id INT NOT NULL,
+--     ingredient_id INT NOT NULL,
+--     vol DECIMAL(10,2),
+--     unit VARCHAR(20) NOT NULL,
+--     is_metric BOOLEAN DEFAULT FALSE,
+--     FOREIGN KEY (recipe_id) REFERENCES RECIPE(id) ON DELETE CASCADE,
+--     FOREIGN KEY (ingredient_id) REFERENCES INGREDIENT(id) ON DELETE CASCADE
+-- );
+
+-- -- DO NOT EDIT ANY CODE BELOW THIS LINE!
+-- -- The below code inserts values into the tables you define.
+
+-- -- Delete all records (delete children first)
+-- DELETE FROM RECIPE_INGREDIENT;
+-- DELETE FROM RECIPE;
+-- DELETE FROM CHEF;
+-- DELETE FROM INGREDIENT;
+
+-- -- Resets the starting id value for each table (works when id is identity/auto_increment)
+-- ALTER TABLE CHEF ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE INGREDIENT ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE RECIPE ALTER COLUMN id RESTART WITH 1;
+-- ALTER TABLE RECIPE_INGREDIENT ALTER COLUMN id RESTART WITH 1;
+
+-- -- populate tables
+-- INSERT INTO CHEF (username, email, password, is_admin) VALUES
+--     ('JoeCool', 'snoopy@null.com', 'redbarron', FALSE),
+--     ('CharlieBrown', 'goodgrief@peanuts.com', 'thegreatpumpkin', FALSE),
+--     ('RevaBuddy', 'revature@revature.com', 'codelikeaboss', FALSE),
+--     ('ChefTrevin', 'trevin@revature.com', 'trevature', TRUE);
+
+-- INSERT INTO RECIPE (name, instructions, chef_id) VALUES
+--     ('carrot soup', 'Put carrot in water.  Boil.  Maybe salt.', 1),
+--     ('potato soup', 'Put potato in water.  Boil.  Maybe salt.', 2),
+--     ('tomato soup', 'Put tomato in water.  Boil.  Maybe salt.', 2),
+--     ('lemon rice soup', 'Put lemon and rice in water.  Boil.  Maybe salt.', 4),
+--     ('stone soup', 'Put stone in water.  Boil.  Maybe salt.', 4);
+
+-- INSERT INTO INGREDIENT (name) VALUES
+--     ('carrot'),
+--     ('potato'),
+--     ('tomato'),
+--     ('lemon'),
+--     ('rice'),
+--     ('stone');
+
+-- INSERT INTO RECIPE_INGREDIENT (id, recipe_id, ingredient_id, vol, unit) VALUES
+--     (DEFAULT, 1, 1, 1, 'cups'),
+--     (DEFAULT, 2, 2, 2, 'cups'),
+--     (DEFAULT, 3, 3, 2, 'cups'),
+--     (DEFAULT, 4, 4, 1, 'Tbs'),
+--     (DEFAULT, 4, 5, 2, 'cups');
