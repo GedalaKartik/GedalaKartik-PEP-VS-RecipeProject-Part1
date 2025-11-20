@@ -3,6 +3,8 @@ import com.revature.util.ConnectionUtil;
 import com.revature.util.Page;
 import com.revature.util.PageOptions;
 import com.revature.model.Chef;
+import com.revature.model.Ingredient;
+
 import java.util.List;
 import java.util.ArrayList;
 //import java.beans.Statement;
@@ -38,7 +40,7 @@ public class ChefDAO {
     public ChefDAO(ConnectionUtil connectionUtil)
     {
      
-        this.connectionUtil=new ConnectionUtil();
+        this.connectionUtil=connectionUtil;
         
           
     }
@@ -83,7 +85,19 @@ public class ChefDAO {
     public Page<Chef> getAllChefs(PageOptions pageOptions) 
     {
         
-        return null;
+        try (Connection con = connectionUtil.getConnection()) 
+        {
+            String sql = "SELECT * FROM CHEF ORDER BY id";
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+
+            return pageResults(rs, pageOptions);
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -229,30 +243,29 @@ public class ChefDAO {
     {
         try(Connection con=connectionUtil.getConnection()) 
         {
-            String sql="SELECT * FROM CHEF ";
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-
             List<Chef> chf=new ArrayList<>();
+
+            String sql="Select * from CHEF where username like ? order by id";
+
+            PreparedStatement ps=con.prepareStatement(sql);
+
+            ps.setString(1, "%"+term+"%");
+
+            ResultSet rs=ps.executeQuery();
 
             while(rs.next())
             {
-                String uname=rs.getString("username");
-
-                if(term.equals(uname))
-                {
-                     Chef obj=new Chef(rs.getInt("id"),rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("is_admin"));
-                     chf.add(obj);
-                }
                 
+                Chef obj=new Chef(rs.getString("username"),rs.getString("email"),rs.getString("password"),rs.getBoolean("is_admin"));
+                chf.add(obj);
                 
             }
-            return chf; 
-
-            
+            return chf;
         } 
-        catch (Exception e) {
+        catch (SQLException e) 
+        {
             // TODO: handle exception
+            e.printStackTrace();
         }
         return null;
     }
@@ -264,8 +277,22 @@ public class ChefDAO {
      * @param pageOptions options for pagination, including page size and page number
      * @return a paginated list of Chef objects that match the search term
      */
-    public Page<Chef> searchChefsByTerm(String term, PageOptions pageOptions) {
-        return null;
+    public Page<Chef> searchChefsByTerm(String term, PageOptions pageOptions) 
+    {
+       try (Connection con = connectionUtil.getConnection()) 
+       {
+            String sql = "SELECT * FROM CHEF WHERE username LIKE ? ORDER BY id";
+            PreparedStatement ps = con.prepareStatement(sql);
+            ps.setString(1, "%" + term + "%");
+
+            ResultSet rs = ps.executeQuery();
+            return pageResults(rs, pageOptions);
+        } 
+        catch (SQLException e) 
+        {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     

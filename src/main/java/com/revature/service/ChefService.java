@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.revature.model.Chef;
 import com.revature.dao.ChefDAO;
 import com.revature.util.Page;
+import com.revature.util.PageOptions;
 
 /**
  * The ChefService class provides services related to Chef objects,
@@ -114,8 +115,18 @@ public class ChefService {
      * @return a Page containing the results of the search
      */
 	
-    public Page<Chef> searchChefs(String term, int page, int pageSize, String sortBy, String sortDirection) {
-        return null;
+    public Page<Chef> searchChefs(String term, int page, int pageSize, String sortBy, String sortDirection) 
+    {
+        PageOptions pageOptions = new PageOptions(page, pageSize, sortBy, sortDirection);
+
+        if (term == null || term.isBlank()) 
+        {
+            return chefDAO.getAllChefs(pageOptions);
+        }    
+        else 
+        {
+            return chefDAO.searchChefsByTerm(term, pageOptions);
+        }
     }
 }
 

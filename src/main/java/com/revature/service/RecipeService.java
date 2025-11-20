@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.revature.dao.RecipeDAO;
+import com.revature.model.Chef;
 import com.revature.model.Recipe;
 import com.revature.util.Page;
+import com.revature.util.PageOptions;
 
 /**
  * The RecipeService class provides services related to Recipe objects,
@@ -26,8 +28,9 @@ public class RecipeService {
      * 
      * @param recipeDao the RecipeDao to be used by this service for data access
      */
-    public RecipeService(RecipeDAO recipeDAO) {
-        
+    public RecipeService(RecipeDAO recipeDAO) 
+    {
+        this.recipeDAO=recipeDAO;    
     }
 
     /**
@@ -37,8 +40,10 @@ public class RecipeService {
      * @return an Optional containing the found Recipe if present;
      *         an empty Optional if not found
      */
-    public Optional<Recipe> findRecipe(int id) {
-        return null;
+    public Optional<Recipe> findRecipe(int id) 
+    {
+        Recipe rep = recipeDAO.getRecipeById(id);
+        return Optional.ofNullable(rep);
     }
 
     /**
@@ -48,8 +53,19 @@ public class RecipeService {
      *
      * @param recipe the Recipe object to be saved
      */
-    public void saveRecipe(Recipe recipe) {
+    public void saveRecipe(Recipe recipe) 
+    {
+        int id=recipe.getId();
         
+        if(id==0)
+        {
+            int repid=recipeDAO.createRecipe(recipe);
+            recipe.setId(repid);
+        }
+        else
+        {
+            recipeDAO.updateRecipe(recipe);
+        }
     }
 
     /**
@@ -62,8 +78,18 @@ public class RecipeService {
      * @param sortDirection the direction of sorting (ascending or descending)
      * @return a Page containing the results of the search
      */
-    public Page<Recipe> searchRecipes(String term, int page, int pageSize, String sortBy, String sortDirection) {
-        return null;
+    public Page<Recipe> searchRecipes(String term, int page, int pageSize, String sortBy, String sortDirection) 
+    {
+        PageOptions pageOptions = new PageOptions(page, pageSize, sortBy, sortDirection);
+
+        if (term == null || term.isBlank()) 
+        {
+            return recipeDAO.getAllRecipes(pageOptions);
+        } 
+        else 
+        {
+            return recipeDAO.searchRecipesByTerm(term, pageOptions);
+        }
     }
 
     /**
@@ -72,8 +98,16 @@ public class RecipeService {
      * @param term the search term used to find recipes
      * @return a list of Recipe objects that match the search term
      */
-    public List<Recipe> searchRecipes(String term) {
-        return null;
+    public List<Recipe> searchRecipes(String term) 
+    {
+        if(term==null)
+        {
+            return recipeDAO.getAllRecipes();
+        }
+        else
+        {
+            return recipeDAO.searchRecipesByTerm(term);
+        }
     }
 
     /**
@@ -81,7 +115,11 @@ public class RecipeService {
      *
      * @param id the unique identifier of the recipe to be deleted
      */
-    public void deleteRecipe(int id) {
+    public void deleteRecipe(int id) 
+    {
+        Recipe rep=recipeDAO.getRecipeById(id);
         
+        if(rep!=null)
+            recipeDAO.deleteRecipe(rep);
     }
 }
