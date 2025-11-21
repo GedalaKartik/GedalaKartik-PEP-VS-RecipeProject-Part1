@@ -29,8 +29,10 @@ public class RecipeController {
      * @param recipeService The service that handles the business logic for managing recipes.
      * * @param authService the service used to manage authentication-related operations
      */
-    public RecipeController(RecipeService recipeService, AuthenticationService authService) {
-        
+    public RecipeController(RecipeService recipeService, AuthenticationService authService)
+    {
+        this.recipeService=recipeService;
+            
     }
 
     /**

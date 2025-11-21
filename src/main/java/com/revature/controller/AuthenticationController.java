@@ -3,6 +3,12 @@ package com.revature.controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revature.model.Chef;
 import com.revature.service.AuthenticationService;
 import com.revature.service.ChefService;
 
@@ -13,7 +19,8 @@ import com.revature.service.ChefService;
  * 
  * It interacts with the ChefService and AuthenticationService for certain functionalities related to the user.
  */
-public class AuthenticationController {
+public class AuthenticationController 
+{
 
     /** A service that handles chef-related operations. */
     @SuppressWarnings("unused")
@@ -31,8 +38,10 @@ public class AuthenticationController {
      * @param chefService the service used to manage chef-related operations
      * @param authService the service used to manage authentication-related operations
      */
-    public AuthenticationController(ChefService chefService, AuthenticationService authService) {
-        
+    public AuthenticationController(ChefService chefService, AuthenticationService authService) 
+    {
+        this.chefService=chefService;
+        this.authService=authService;
     }
 
     /**
@@ -44,7 +53,53 @@ public class AuthenticationController {
      *
      * @param ctx the Javalin context containing the chef information in the request body
      */
-    public void register(Context ctx) {
+    public void register(Context ctx) 
+    {
+        String json=ctx.body();
+
+        ObjectMapper om=new ObjectMapper();
+
+        try 
+        {
+            Chef chf=om.readValue(json,Chef.class);
+
+            Optional<Chef> opchef=chefService.findChef(chf.getId());
+
+            Chef dbChef = opchef.orElse(null);
+
+            if(dbChef==null)
+            {
+                chefService.saveChef(chf);
+                ctx.status(201);
+                ctx.json(chf);    
+            }
+            else
+            {
+                if(dbChef.getUsername().equals(chf.getUsername()))
+                {
+                    ctx.status(409);
+                    ctx.result("Username already exists");
+                }
+                else
+                {
+                    chefService.saveChef(chf);
+                    ctx.status(201);
+                    ctx.json(chf);
+                }
+            }
+
+
+        } 
+        catch (JsonMappingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+        catch (JsonProcessingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         
     }
 
@@ -55,8 +110,44 @@ public class AuthenticationController {
      *
      * @param ctx the Javalin context containing the chef login credentials in the request body
      */
-    public void login(Context ctx) {
+    public void login(Context ctx) 
+    {
+        String json=ctx.body();
         
+        ObjectMapper om=new ObjectMapper();
+
+        try 
+        {
+            Chef chf=om.readValue(json,Chef.class);
+
+            String token=authService.login(chf);
+
+    if (token == null) {
+            ctx.status(401).result("Invalid username or password");
+            return;
+        }
+
+        // If login successful → send token + header
+        ctx.status(200);
+        ctx.header("Authorization", token);
+
+        // return token in JSON format
+        ctx.json(
+            new java.util.HashMap<String, String>() {{
+                put("token", token);
+            }}
+        );
+        } 
+        catch (JsonMappingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+        catch (JsonProcessingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**

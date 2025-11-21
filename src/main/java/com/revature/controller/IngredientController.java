@@ -3,6 +3,13 @@ package com.revature.controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+import java.util.Optional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.revature.model.Chef;
+import com.revature.model.Ingredient;
 import com.revature.service.IngredientService;
 
 
@@ -29,8 +36,9 @@ public class IngredientController {
      * @param ingredientService the service used to manage ingredient-related operations
      */
 
-    public IngredientController(IngredientService ingredientService) {
-        
+    public IngredientController(IngredientService ingredientService) 
+    {
+        this.ingredientService=ingredientService;    
     }
 
     /**
@@ -40,8 +48,24 @@ public class IngredientController {
      *
      * @param ctx the Javalin context containing the request path parameter for the ingredient ID
      */
-    public void getIngredient(Context ctx) {
-        
+    public void getIngredient(Context ctx) 
+    {
+
+       int id = Integer.parseInt(ctx.pathParam("id"));
+
+       Optional<Ingredient> oping=ingredientService.findIngredient(id);
+
+       Ingredient dbing = oping.orElse(null);
+
+       if(dbing!=null)
+       {
+            ctx.status(200);
+            ctx.json(dbing);    
+       }
+       else
+       {
+            ctx.status(404);
+       }
     }
 
     /**
@@ -51,8 +75,13 @@ public class IngredientController {
      *
      * @param ctx the Javalin context containing the request path parameter for the ingredient id
      */
-    public void deleteIngredient(Context ctx) {
+    public void deleteIngredient(Context ctx) 
+    {
+        int id = Integer.parseInt(ctx.pathParam("id"));
+
+        ingredientService.deleteIngredient(id);
         
+        ctx.status(204);
     }
 
     /**
@@ -62,8 +91,43 @@ public class IngredientController {
      *
      * @param ctx the Javalin context containing the request path parameter and updated ingredient data in the request body
      */
-    public void updateIngredient(Context ctx) {
-       
+    public void updateIngredient(Context ctx) 
+    {
+        String json=ctx.body();
+
+        ObjectMapper om=new ObjectMapper();
+
+        try 
+        {
+            Ingredient ing=om.readValue(json,Ingredient.class);
+
+            int id = Integer.parseInt(ctx.pathParam("id"));
+
+            Optional<Ingredient> existing = ingredientService.findIngredient(id);
+            
+            if(existing.isEmpty()) 
+            {
+                
+                ctx.status(404);
+            }
+            else
+            {
+                ingredientService.saveIngredient(ing);
+                ctx.status(204);
+            }
+
+
+        } 
+        catch (JsonMappingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+        catch (JsonProcessingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -73,8 +137,31 @@ public class IngredientController {
      *
      * @param ctx the Javalin context containing the ingredient data in the request body
      */
-    public void createIngredient(Context ctx) {
+    public void createIngredient(Context ctx) 
+    {
+        String json=ctx.body();
 
+        ObjectMapper om=new ObjectMapper();
+
+        try 
+        {
+            Ingredient ing=om.readValue(json,Ingredient.class);
+
+            ingredientService.saveIngredient(ing);
+
+            ctx.status(201);
+            
+        } 
+        catch (JsonMappingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } 
+        catch (JsonProcessingException e) 
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -84,7 +171,8 @@ public class IngredientController {
      *
      * @param ctx the Javalin context containing query parameters for pagination, sorting, and filtering
      */
-    public void getIngredients(Context ctx) {
+    public void getIngredients(Context ctx) 
+    {
        
     }
 
