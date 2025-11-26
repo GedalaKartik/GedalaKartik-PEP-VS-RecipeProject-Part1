@@ -7,7 +7,6 @@ import com.revature.model.Ingredient;
 
 import java.util.List;
 import java.util.ArrayList;
-//import java.beans.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,7 +22,8 @@ import java.sql.Statement;
  * The class primarily uses a ConnectionUtil object to connect to the database and includes methods for searching, paginating, and mapping results from database queries.
  */
 
-public class ChefDAO {
+public class ChefDAO 
+{
 
     /** A utility class for establishing connections to the database. */
     @SuppressWarnings("unused")
@@ -39,10 +39,7 @@ public class ChefDAO {
      */
     public ChefDAO(ConnectionUtil connectionUtil)
     {
-     
         this.connectionUtil=connectionUtil;
-        
-          
     }
 
     /**
@@ -69,7 +66,6 @@ public class ChefDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
          return null;
@@ -127,7 +123,6 @@ public class ChefDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;
@@ -160,14 +155,13 @@ public class ChefDAO {
                 ResultSet rs = ps.getGeneratedKeys();
                 if (rs.next()) 
                 {
-                    return rs.getInt(1);   // return generated chef_id
+                    return rs.getInt(1);  
                 }
             }
             return 0;    
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
             return 0;
         }
@@ -192,16 +186,14 @@ public class ChefDAO {
             ps.setBoolean(4, chef.isAdmin());
             ps.setInt(5, chef.getId());
 
-            int x=ps.executeUpdate();
+            ps.executeUpdate();
 
 
                
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-           
         }
     }
 
@@ -220,16 +212,14 @@ public class ChefDAO {
 
             ps.setInt(1, chef.getId());
 
-            int x=ps.executeUpdate();
+            ps.executeUpdate();
 
 
               
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-          
         }    
     }
 
@@ -264,7 +254,6 @@ public class ChefDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;

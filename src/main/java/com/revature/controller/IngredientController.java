@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.model.Chef;
 import com.revature.model.Ingredient;
 import com.revature.service.IngredientService;
+import com.revature.util.Page;
 
 
 /**
@@ -19,7 +20,8 @@ import com.revature.service.IngredientService;
  * The class interacts with the IngredientService to perform these operations.
  */
 
-public class IngredientController {
+public class IngredientController 
+{
 
     /**
      * A service that manages ingredient-related operations.
@@ -103,9 +105,9 @@ public class IngredientController {
 
             int id = Integer.parseInt(ctx.pathParam("id"));
 
-            Optional<Ingredient> existing = ingredientService.findIngredient(id);
+            Optional<Ingredient> oping = ingredientService.findIngredient(id);
             
-            if(existing.isEmpty()) 
+            if(oping.isEmpty()) 
             {
                 
                 ctx.status(404);
@@ -173,7 +175,26 @@ public class IngredientController {
      */
     public void getIngredients(Context ctx) 
     {
-       
+
+        String term = ctx.queryParam("term");
+
+        if (ctx.queryParam("page") == null && ctx.queryParam("pageSize") == null && ctx.queryParam("sortBy") == null && ctx.queryParam("sortDirection") == null) 
+        {
+            
+            ctx.json(ingredientService.searchIngredients(term));
+            ctx.status(200);
+            return;
+        }
+
+        int page = getParamAsClassOrElse(ctx, "page", Integer.class, 1);
+        int pageSize = getParamAsClassOrElse(ctx, "pageSize", Integer.class, 10);
+        String sortBy = getParamAsClassOrElse(ctx, "sortBy", String.class, "id");
+        String sortDirection = getParamAsClassOrElse(ctx, "sortDirection", String.class, "ASC");
+
+        Page<Ingredient> resultPage = ingredientService.searchIngredients(term,page,pageSize,sortBy,sortDirection);
+
+        ctx.json(resultPage);
+        ctx.status(200);
     }
 
     /**

@@ -3,7 +3,9 @@ package com.revature.controller;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -63,32 +65,21 @@ public class AuthenticationController
         {
             Chef chf=om.readValue(json,Chef.class);
 
-            Optional<Chef> opchef=chefService.findChef(chf.getId());
+            List<Chef> dbchefs=chefService.searchChefs(null);
 
-            Chef dbChef = opchef.orElse(null);
-
-            if(dbChef==null)
+            for(Chef x:dbchefs)
             {
-                chefService.saveChef(chf);
-                ctx.status(201);
-                ctx.json(chf);    
-            }
-            else
-            {
-                if(dbChef.getUsername().equals(chf.getUsername()))
+                if(x.getUsername().equals(chf.getUsername()))
                 {
                     ctx.status(409);
                     ctx.result("Username already exists");
                 }
-                else
-                {
-                    chefService.saveChef(chf);
-                    ctx.status(201);
-                    ctx.json(chf);
-                }
             }
 
-
+            chefService.saveChef(chf);
+            ctx.status(201);
+            ctx.json(chf);    
+            
         } 
         catch (JsonMappingException e) 
         {
@@ -122,21 +113,19 @@ public class AuthenticationController
 
             String token=authService.login(chf);
 
-    if (token == null) {
-            ctx.status(401).result("Invalid username or password");
-            return;
-        }
+            if (token == null) 
+            {
+                ctx.status(401);
+                ctx.result("Invalid username or password");
+            }
+            else
+            {
+            
+                ctx.status(200);
+                ctx.header("Authorization", token);
 
-        // If login successful → send token + header
-        ctx.status(200);
-        ctx.header("Authorization", token);
-
-        // return token in JSON format
-        ctx.json(
-            new java.util.HashMap<String, String>() {{
-                put("token", token);
-            }}
-        );
+                ctx.json(token);
+            }
         } 
         catch (JsonMappingException e) 
         {
@@ -155,8 +144,16 @@ public class AuthenticationController
      *
      * @param ctx the Javalin context, containing the Authorization token in the request header
      */
-    public void logout(Context ctx) {
-        
+    public void logout(Context ctx) 
+    {
+        String authHeader = ctx.header("Authorization");
+        if(authHeader != null && authHeader.startsWith("Bearer "))
+        {
+            String token = authHeader.substring("Bearer ".length());
+            authService.logout(token);
+        }
+        ctx.status(200);
+        ctx.result("Logout successful");
     }
 
     /**
@@ -166,10 +163,12 @@ public class AuthenticationController
      *
      * @param app the Javalin application to which routes are added
      */
-    public void configureRoutes(Javalin app) {
+    public void configureRoutes(Javalin app) 
+    {
         app.post("/register", this::register);
         app.post("/login", this::login);
         app.post("/logout", this::logout);
     }
 
 }
+

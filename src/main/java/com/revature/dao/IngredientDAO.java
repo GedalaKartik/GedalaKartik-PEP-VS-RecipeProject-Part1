@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,8 @@ import com.revature.model.Ingredient;
  * This class relies on the ConnectionUtil class for database connectivity and also supports searching and paginating through Ingredient records.
  */
 
-public class IngredientDAO {
+public class IngredientDAO 
+{
 
     /** A utility class used for establishing connections to the database. */
     @SuppressWarnings("unused")
@@ -39,7 +41,6 @@ public class IngredientDAO {
     public IngredientDAO(ConnectionUtil connectionUtil) 
     {
         this.connectionUtil=connectionUtil;
-           
     }
 
     /**
@@ -68,7 +69,6 @@ public class IngredientDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
             return null;
         }
@@ -88,7 +88,7 @@ public class IngredientDAO {
         try(Connection con=connectionUtil.getConnection())
         {
             String sql="insert into INGREDIENT(name) values(?)";
-            PreparedStatement ps=con.prepareStatement(sql);
+            PreparedStatement ps=con.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
 
 
             ps.setString(1, ingredient.getName());
@@ -99,26 +99,19 @@ public class IngredientDAO {
             if(x>0)
             {
             
-                String sql1 = "SELECT id FROM INGREDIENT WHERE name = ?";
-                PreparedStatement ps1 = con.prepareStatement(sql1);
-
-                ps1.setString(1, ingredient.getName());
-
-                ResultSet rs = ps1.executeQuery();
-
-                if(rs.next())  
-                {
-                    return rs.getInt("id");  
-                }
+                ResultSet rs = ps.getGeneratedKeys();
+                if (rs.next()) 
+                    return rs.getInt(1);
 
                
             }
 
-            return 0;    
+            return -1;
+
+           
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
             return 0;
         }
@@ -149,9 +142,7 @@ public class IngredientDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-          
         }
     }
 
@@ -173,14 +164,10 @@ public class IngredientDAO {
 
             ps.executeUpdate();
 
-
-               
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-           
         }    
     }
 
@@ -210,7 +197,6 @@ public class IngredientDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;
@@ -224,17 +210,14 @@ public class IngredientDAO {
      */
     public Page<Ingredient> getAllIngredients(PageOptions pageOptions) 
     {
-         try (Connection con = connectionUtil.getConnection()) 
-         {
+        try (Connection con = connectionUtil.getConnection()) 
+        {
             
-            String sortBy = (pageOptions.getSortBy() == null || pageOptions.getSortBy().trim().isEmpty())
-                    ? "ID"
-                    : pageOptions.getSortBy();
-            String dir = (pageOptions.getSortDirection() == null || pageOptions.getSortDirection().trim().isEmpty())
-                    ? "ASC"
-                    : pageOptions.getSortDirection();
+            String sortBy = pageOptions.getSortBy();
+            String dir = pageOptions.getSortDirection();
 
-            String sql = String.format("SELECT id, name FROM INGREDIENT ORDER BY %s %s", sortBy, dir);
+        
+            String sql = "SELECT id, name FROM INGREDIENT ORDER BY "+sortBy+" "+dir;
             PreparedStatement ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             return pageResults(rs, pageOptions);
@@ -277,7 +260,6 @@ public class IngredientDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;
@@ -294,16 +276,11 @@ public class IngredientDAO {
     {
          try (Connection con = connectionUtil.getConnection()) 
          {
-            String sortBy = (pageOptions.getSortBy() == null || pageOptions.getSortBy().trim().isEmpty())
-                    ? "ID"
-                    : pageOptions.getSortBy();
-            String dir = (pageOptions.getSortDirection() == null || pageOptions.getSortDirection().trim().isEmpty())
-                    ? "ASC"
-                    : pageOptions.getSortDirection();
+            String sortBy = pageOptions.getSortBy();
+            String dir = pageOptions.getSortDirection();
 
-            String sql = String.format(
-                    "SELECT id, name FROM INGREDIENT WHERE UPPER(name) LIKE UPPER(?) ORDER BY %s %s",
-                    sortBy, dir);
+            String sql = "SELECT id, name FROM INGREDIENT WHERE name LIKE ? ORDER BY "+sortBy+" "+dir;
+            
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, "%" + term + "%");
             ResultSet rs = ps.executeQuery();
@@ -364,4 +341,5 @@ public class IngredientDAO {
                 (int) Math.ceil(ingredients.size() / ((float) pageOptions.getPageSize())), ingredients.size(), subList);
     }
 }
+
 

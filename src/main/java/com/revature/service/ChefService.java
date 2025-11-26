@@ -15,7 +15,8 @@ import com.revature.util.PageOptions;
  * logic, ensuring that all operations on Chef objects are managed 
  * consistently and efficiently.
  */
-public class ChefService {
+public class ChefService 
+{
 
     /** The data access object used for performing operations on Chef entities. */
     @SuppressWarnings("unused")
@@ -119,7 +120,7 @@ public class ChefService {
     {
         PageOptions pageOptions = new PageOptions(page, pageSize, sortBy, sortDirection);
 
-        if (term == null || term.isBlank()) 
+        if (term == null ) 
         {
             return chefDAO.getAllChefs(pageOptions);
         }    

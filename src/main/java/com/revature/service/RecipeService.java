@@ -16,7 +16,8 @@ import com.revature.util.PageOptions;
  * application logic, ensuring that all operations on Recipe objects
  * are handled consistently and efficiently.
  */
-public class RecipeService {
+public class RecipeService 
+{
 
     /** The data access object used for performing operations on Recipe entities. */
     private RecipeDAO recipeDAO;
@@ -57,7 +58,7 @@ public class RecipeService {
     {
         int id=recipe.getId();
         
-        if(id==0)
+        if(id==0  || recipeDAO.getRecipeById(recipe.getId()) == null)
         {
             int repid=recipeDAO.createRecipe(recipe);
             recipe.setId(repid);
@@ -82,7 +83,7 @@ public class RecipeService {
     {
         PageOptions pageOptions = new PageOptions(page, pageSize, sortBy, sortDirection);
 
-        if (term == null || term.isBlank()) 
+        if (term == null) 
         {
             return recipeDAO.getAllRecipes(pageOptions);
         } 
@@ -123,3 +124,4 @@ public class RecipeService {
             recipeDAO.deleteRecipe(rep);
     }
 }
+

@@ -65,7 +65,7 @@ public class IngredientService
         PageOptions pageOptions = new PageOptions(page, pageSize, sortBy, sortDirection);
 
   
-        if (term == null || term.isBlank()) 
+        if (term == null) 
         {
             return ingredientDAO.getAllIngredients(pageOptions);
         }       
@@ -132,3 +132,4 @@ public class IngredientService
         }
     }
 }
+

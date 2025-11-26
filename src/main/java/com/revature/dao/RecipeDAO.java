@@ -24,7 +24,8 @@ import java.sql.Statement;
  * Although the implementation may seem extensive for simple functionality, this design improves testability, maintainability, and extensibility of the overall infrastructure.
  */
 
-public class RecipeDAO {
+public class RecipeDAO 
+{
 
     /**
 	 * DAO for managing Chef entities, used for retrieving chef details associated with recipes.
@@ -87,9 +88,7 @@ public class RecipeDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-
         }
         return null;
     }
@@ -100,27 +99,21 @@ public class RecipeDAO {
      * @param pageOptions options for pagination, including page size and page number
      * @return a paginated list of Recipe objects
      */
-    public Page<Recipe> getAllRecipes(PageOptions pageOptions) 
+
+    public Page<Recipe> getAllRecipes(PageOptions pageOptions)
     {
         try (Connection con = connectionUtil.getConnection()) 
         {
-            String sortBy = (pageOptions.getSortBy() == null || pageOptions.getSortBy().trim().isEmpty())
-                    ? "id"
-                    : pageOptions.getSortBy();
-            String dir = (pageOptions.getSortDirection() == null || pageOptions.getSortDirection().trim().isEmpty())
-                    ? "ASC"
-                    : pageOptions.getSortDirection();
-
-            String sql = String.format("SELECT id, name, instructions, chef_id FROM RECIPE ORDER BY %s %s", sortBy,
-                    dir);
-            PreparedStatement ps = con.prepareStatement(sql);
+            String sql = "SELECT * FROM RECIPE ORDER BY id";
+            PreparedStatement ps=con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
+
             return pageResults(rs, pageOptions);
-        }
+        } 
         catch (SQLException e) 
         {
             e.printStackTrace();
-            return new Page<>(pageOptions.getPageNumber(), pageOptions.getPageSize(), 0, 0, new ArrayList<>());
+            return null;
         }
     }
 
@@ -158,7 +151,6 @@ public class RecipeDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;
@@ -176,20 +168,13 @@ public class RecipeDAO {
     {
         try (Connection con = connectionUtil.getConnection()) 
         {
-            String sortBy = (pageOptions.getSortBy() == null || pageOptions.getSortBy().trim().isEmpty())
-                    ? "id"
-                    : pageOptions.getSortBy();
-            String dir = (pageOptions.getSortDirection() == null || pageOptions.getSortDirection().trim().isEmpty())
-                    ? "ASC"
-                    : pageOptions.getSortDirection();
+            String sortBy = pageOptions.getSortBy();
+            String dir = pageOptions.getSortDirection();
 
-            String sql = String.format(
-                    "SELECT id, name, instructions, chef_id FROM RECIPE WHERE UPPER(name) LIKE UPPER(?) OR UPPER(instructions) LIKE UPPER(?) ORDER BY %s %s",
-                    sortBy, dir);
+            String sql = "select id, name, instructions, chef_id from RECIPE where name LIKE ? order by "+sortBy+" "+dir;
+                   
             PreparedStatement ps = con.prepareStatement(sql);
-            String like = "%" + term + "%";
-            ps.setString(1, like);
-            ps.setString(2, like);
+            ps.setString(1, "%" + term + "%");
             ResultSet rs = ps.executeQuery();
             return pageResults(rs, pageOptions);
         } 
@@ -229,7 +214,6 @@ public class RecipeDAO {
         } 
         catch(SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
         }
         return null;
@@ -272,9 +256,7 @@ public class RecipeDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-           
         }
         return 0;
     }
@@ -302,9 +284,7 @@ public class RecipeDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
-            e.printStackTrace();
-           
+             e.printStackTrace();
         }    
     }
 
@@ -334,9 +314,7 @@ public class RecipeDAO {
         } 
         catch (SQLException e) 
         {
-            // TODO: handle exception
             e.printStackTrace();
-          
         } 
     }
 
@@ -351,7 +329,8 @@ public class RecipeDAO {
 	 * @return a Recipe object representing the mapped row
 	 * @throws SQLException if there is an error accessing the ResultSet
 	 */
-	private Recipe mapSingleRow(ResultSet set) throws SQLException {
+	private Recipe mapSingleRow(ResultSet set) throws SQLException 
+    {
 		int id = set.getInt("id");
 		String name = set.getString("name");
 		String instructions = set.getString("instructions");
@@ -368,9 +347,11 @@ public class RecipeDAO {
 	 * @return a list of Recipe objects representing the mapped rows
 	 * @throws SQLException if there is an error accessing the ResultSet
 	 */
-	private List<Recipe> mapRows(ResultSet set) throws SQLException {
+	private List<Recipe> mapRows(ResultSet set) throws SQLException 
+    {
 		List<Recipe> recipes = new ArrayList<>();
-		while (set.next()) {
+		while (set.next()) 
+        {
 			recipes.add(mapSingleRow(set));
 		}
 		return recipes;
@@ -388,7 +369,8 @@ public class RecipeDAO {
 	 * @return a Page object containing the paginated list of Recipe objects
 	 * @throws SQLException if there is an error accessing the ResultSet
 	 */
-	private Page<Recipe> pageResults(ResultSet set, PageOptions pageOptions) throws SQLException {
+	private Page<Recipe> pageResults(ResultSet set, PageOptions pageOptions) throws SQLException
+    {
 		List<Recipe> recipes = mapRows(set);
 		int offset = (pageOptions.getPageNumber() - 1) * pageOptions.getPageSize();
 		int limit = offset + pageOptions.getPageSize();
@@ -407,9 +389,11 @@ public class RecipeDAO {
 	 * @param end   the ending index (exclusive) for the slice
 	 * @return a list of Recipe objects representing the sliced portion
 	 */
-	private List<Recipe> sliceList(List<Recipe> list, int start, int end) {
+	private List<Recipe> sliceList(List<Recipe> list, int start, int end) 
+    {
 		List<Recipe> sliced = new ArrayList<>();
-		for (int i = start; i < end; i++) {
+		for (int i = start; i < end; i++) 
+        {
 			sliced.add(list.get(i));
 		}
 		return sliced;
